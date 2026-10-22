@@ -1,0 +1,6 @@
+{
+  "appId": "com.yawmi.personalassistant",
+  "appName": "YAWMI - يومي",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
