@@ -1,0 +1,16 @@
+{
+  "name": "yawmi-smart-assistant",
+  "version": "1.0.0",
+  "description": "تطبيق يومي — مساعدك الشخصي الذكي (Offline-First Android & Web App)",
+  "main": "index.html",
+  "scripts": {
+    "cap:init": "npx cap init YAWMI com.yawmi.app --web-dir .",
+    "cap:android": "npx cap add android && npx cap sync",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/local-notifications": "^6.0.0"
+  }
+}
