@@ -1,0 +1,62 @@
+name: Build YAWMI Android APK (BLE, Health Connect, Camera & Alarms)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Capacitor, Generate Android Shell & Apply YAWMI Full Permissions Overlay
+        run: |
+          cp -r android /tmp/android_custom_overlay
+          rm -rf android
+          npm install @capacitor/core@^6.1.2 @capacitor/cli@^6.1.2 @capacitor/android@^6.1.2 @capacitor/local-notifications@^6.1.0
+          npx cap add android
+          rm -f android/app/src/main/java/com/yawmi/personalassistant/MainActivity.java
+          cp -rf /tmp/android_custom_overlay/* android/
+          npx cap sync android
+
+      - name: Build Debug APK with Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/YAWMI-Full-Android.apk
+
+      - name: Upload Compiled YAWMI APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YAWMI-Android-Debug-APK
+          path: android/app/build/outputs/apk/debug/YAWMI-Full-Android.apk
+
+      - name: Publish Direct APK Download in GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: always()
+        continue-on-error: true
+        with:
+          tag_name: v1.0-latest
+          name: "YAWMI Android APK — نسخة الأندرويد الكاملة (بلوتوث + Health Connect + كاميرا الأغذية + المنبهات)"
+          files: android/app/build/outputs/apk/debug/YAWMI-Full-Android.apk
